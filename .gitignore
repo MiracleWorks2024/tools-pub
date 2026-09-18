@@ -1,0 +1,43 @@
+# ── 인증 정보 (최우선 차단) ────────────────────
+.env
+.env.*
+*.key
+*.pem
+*.p12
+*credentials*
+*secret*
+*token*
+.netrc
+
+# ── 사업 자료 실수 반입 차단 ───────────────────
+급여*
+인사*
+협약서*
+제안서*
+계약서*
+*재무*
+*payroll*
+*salary*
+
+# ── 작업 산출물 (도구만 보관, 결과물은 제외) ────
+*.html
+*.docx
+*.pptx
+*.xlsx
+*.pdf
+outputs/
+out/
+
+# ── Python ─────────────────────────────────
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# ── OS / 편집기 ────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
