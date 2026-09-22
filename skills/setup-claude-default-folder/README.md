@@ -32,7 +32,7 @@ sh setup.sh
 
 새 세션에서 `/setup-claude-default-folder` 를 실행하면 질문 두 개를 묻습니다.
 
-1. **기본 산출물 폴더** — `~/Claude/default` (추천), `~/Documents/Claude`, `~/Desktop/Claude`, 직접 입력
+1. **기본 산출물 폴더** — `~/MAS/CA/claude default` (추천), `~/Documents/Claude`, `~/Desktop/Claude`, 직접 입력
 2. **SessionStart 훅 추가 여부** — CLAUDE.md 만 (추천) / 훅도 같이
 
 ## 바꾸는 파일

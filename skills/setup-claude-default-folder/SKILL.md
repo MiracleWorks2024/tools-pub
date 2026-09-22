@@ -51,7 +51,7 @@ command -v python3 || command -v jq || echo "(둘 다 없음 — 직접 편집�
 
 **질문 1 — 기본 산출물 폴더를 어디로 할까요?** (`header: "기본 폴더"`)
 
-- `~/Claude/default` (추천) — `~/Claude` 를 산출물(`default/`)·공용 도구(`tools/`)·프로젝트(`projects/`)로 나눠 쓰는 구조의 산출물 칸
+- `~/MAS/CA/claude default` (추천) — `~/MAS/CA` 를 에이전트별 산출물(`claude default/`, `codex default/` …)·공용 도구(`tools/`)·공용 프로젝트(`projects/`)로 나눠 쓰는 구조의 산출물 칸
 - `~/Documents/Claude` — 문서와 함께 관리. iCloud Drive 동기화 설정이 켜져 있으면 다른 기기에서도 보인다
 - `~/Desktop/Claude` — 결과물이 바로 눈에 보이지만 바탕화면이 지저분해질 수 있다
 
@@ -117,7 +117,7 @@ cp "$HOME/.claude/settings.json" "$HOME/.claude/settings.json.bak.$(date +%Y%m%d
 1. `permissions.additionalDirectories` 배열에 선택한 폴더를 추가한다.
    **이미 있으면 추가하지 않는다.** `permissions` 나 배열이 없으면 만든다.
    기존 `permissions.allow` / `deny` / 그 밖의 모든 키는 그대로 둔다.
-   단, 선택한 폴더가 `~/Claude/default` 이면 상위 폴더 `~/Claude` 를 대신 등록한다.
+   단, 선택한 폴더가 `~/MAS/CA/claude default` 이면 상위 폴더 `~/MAS/CA` 를 대신 등록한다.
    같은 루트 아래 `tools/`, `projects/` 도 승인 창 없이 써야 하기 때문이다.
 
 2. 질문 2에서 훅을 선택한 경우에만, 5단계의 훅 설정을 추가한다.

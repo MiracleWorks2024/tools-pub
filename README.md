@@ -35,18 +35,18 @@ python3 md2html.py 문서.md
 최초 1회, 컴퓨터마다 실행합니다. 공개 저장소라 **GitHub 로그인 없이** 됩니다.
 
 ```bash
-git clone https://github.com/MiracleWorks2024/tools-pub.git ~/Claude/tools/github-pub
-sh ~/Claude/tools/github-pub/setup.sh
+git clone https://github.com/MiracleWorks2024/tools-pub.git ~/MAS/CA/tools/github-pub
+sh ~/MAS/CA/tools/github-pub/setup.sh
 ```
 
 `setup.sh`는 `skills/` 아래 스킬을 `~/.claude/skills/`에 링크로 연결하고, Claude Code 세션이 시작될 때마다 이 저장소를 자동으로 `git pull` 하는 훅을 등록합니다. 여러 번 실행해도 안전합니다.
 
 **Claude 데스크톱 앱에서 할 때**는 새 세션을 열고 첫 메시지로 다음을 붙여넣습니다. 폴더는 지정하지 않아도 됩니다.
 
-> 다음 명령을 실행해줘: git clone https://github.com/MiracleWorks2024/tools-pub.git ~/Claude/tools/github-pub && sh ~/Claude/tools/github-pub/setup.sh
+> 다음 명령을 실행해줘: git clone https://github.com/MiracleWorks2024/tools-pub.git ~/MAS/CA/tools/github-pub && sh ~/MAS/CA/tools/github-pub/setup.sh
 
 - 저장소 이름만 말해도 Claude가 찾아서 실행하는 경우가 많지만, 이름이 같은 다른 사람의 저장소를 잡지 않도록 전체 주소를 주는 편이 확실합니다
-- `~/Claude`에 쓰기 승인 창이 뜨면 승인합니다
+- `~/MAS/CA`에 쓰기 승인 창이 뜨면 승인합니다
 - 앱의 터미널 패널 버튼은 대화를 시작해야 나타납니다. 앱 없이 터미널.app이나 Ghostty에서 위 명령을 직접 실행해도 됩니다
 
 설치가 끝나면 새 세션에서 `/setup-claude-default-folder`로 기본 산출물 폴더도 설정할 수 있습니다.
@@ -54,7 +54,7 @@ sh ~/Claude/tools/github-pub/setup.sh
 설치 확인:
 
 ```bash
-git -C ~/Claude/tools/github-pub remote get-url origin   # https://github.com/MiracleWorks2024/tools-pub.git
+git -C ~/MAS/CA/tools/github-pub remote get-url origin   # https://github.com/MiracleWorks2024/tools-pub.git
 ls -l ~/.claude/skills/                                  # setup-claude-default-folder -> …/github-pub/skills/…
 grep pull-tools-pub ~/.claude/settings.json              # 훅 등록 한 줄
 ```
@@ -81,7 +81,7 @@ git diff --cached | grep -niE "api[_-]?key|token|secret|password|비밀번호|�
 
 한 컴퓨터에서 커밋해 두고 아직 push 하지 않은 사이 다른 컴퓨터가 먼저 push 했거나, 받아올 변경이 아직 커밋하지 않은 로컬 수정과 겹치면 자동 pull은 아무것도 바꾸지 않고 멈춥니다. 이때는 로그를 확인하고 직접 합칩니다(보통 `git pull --rebase`).
 
-공개하면 안 되는 도구는 이 저장소가 아니라 동기화되지 않는 `~/Claude/tools/local/`에 둡니다.
+공개하면 안 되는 도구는 이 저장소가 아니라 동기화되지 않는 `~/MAS/CA/tools/local/`에 둡니다.
 
 ### 이 컴퓨터에서도 push 하려면
 
