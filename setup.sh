@@ -6,9 +6,11 @@
 # 하는 일
 #   1. skills/* 를 ~/.claude/skills/ 에 심볼릭 링크로 연결한다.
 #      링크라서 git pull 만 하면 스킬도 최신이 된다.
-#   2. 세션 시작 시 자동 pull 훅을 ~/.claude/hooks/ 에 복사하고
+#   2. 터미널 명령(app-sessions 등)을 ~/.local/bin/ 에 심볼릭 링크로 연결한다.
+#   3. 세션 시작 시 자동 pull 훅을 ~/.claude/hooks/ 에 복사하고
 #      ~/.claude/settings.json 의 hooks.SessionStart 에 등록한다.
-#   3. 도구 실행에 필요한 Python 패키지가 있는지 확인만 한다 (설치는 하지 않는다).
+#      같은 파일에 대화 기록 보관기간(cleanupPeriodDays)이 없으면 36500일로 넣는다.
+#   4. 도구 실행에 필요한 Python 패키지가 있는지 확인만 한다 (설치는 하지 않는다).
 #
 # macOS / Linux / WSL / Git Bash 에서 동작한다.
 
@@ -51,7 +53,30 @@ for dir in "$REPO"/skills/*/; do
 done
 echo
 
-# ── 2. 자동 pull 훅 ──────────────────────────────────────
+# ── 2. 명령 연결 ─────────────────────────────────────────
+BIN_DIR="$HOME/.local/bin"
+COMMANDS="skills/app-sessions/app-sessions"
+mkdir -p "$BIN_DIR"
+for rel in $COMMANDS; do
+  src="$REPO/$rel"
+  [ -f "$src" ] || continue
+  chmod +x "$src"
+  dest="$BIN_DIR/$(basename "$rel")"
+  if [ -e "$dest" ] && [ ! -L "$dest" ]; then
+    echo "건너뜀: $dest 에 같은 이름의 파일이 이미 있습니다 (링크가 아님)"
+    continue
+  fi
+  ln -sf "$src" "$dest"
+  echo "명령 연결: $dest  ->  $src"
+done
+case ":$PATH:" in
+  *":$BIN_DIR:"*) ;;
+  *) echo "주의: $BIN_DIR 가 PATH 에 없습니다. ~/.zshrc 에 다음을 추가하십시오:"
+     echo "  export PATH=\"\$HOME/.local/bin:\$PATH\"" ;;
+esac
+echo
+
+# ── 3. 자동 pull 훅 · 보관기간 ────────────────────────────
 mkdir -p "$CLAUDE_DIR/hooks"
 HOOK="$CLAUDE_DIR/hooks/pull-tools-pub.sh"
 cp "$REPO/hooks/pull-tools-pub.sh" "$HOOK"
@@ -85,6 +110,11 @@ for group in session_start:
 if not found:
     session_start.append({'matcher': 'startup', 'hooks': [entry]})
 
+# 대화 기록 보관기간. 기본 30일이면 CLI 세션 기록이 지워진다. 이미 값이 있으면 존중한다.
+added_retention = 'cleanupPeriodDays' not in data
+if added_retention:
+    data['cleanupPeriodDays'] = 36500
+
 new = json.dumps(data, indent=2, ensure_ascii=False) + '\n'
 if new == raw:
     print('settings.json: 이미 등록되어 있음 (변경 없음)')
@@ -95,6 +125,8 @@ else:
     with open(path, 'w', encoding='utf-8') as f:
         f.write(new)
     print('settings.json: SessionStart 훅 ' + ('갱신' if found else '등록'))
+    if added_retention:
+        print('settings.json: cleanupPeriodDays = 36500 (대화 기록 약 100년 보관)')
 PYEOF
 else
   echo "python3 가 없어 settings.json 은 자동으로 고치지 못했습니다."
@@ -106,7 +138,7 @@ else
 fi
 echo
 
-# ── 3. Python 패키지 확인 ────────────────────────────────
+# ── 4. Python 패키지 확인 ────────────────────────────────
 missing=""
 command -v python3 >/dev/null 2>&1 || missing="python3"
 if [ -z "$missing" ]; then

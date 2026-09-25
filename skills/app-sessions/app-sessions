@@ -1,0 +1,119 @@
+#!/usr/bin/env python3
+"""Claude 데스크탑 앱 세션을 제목으로 찾아 CLI 세션 ID를 보여주고, 원하면 CLI에서 이어간다.
+
+사용법:
+  app-sessions                 앱 세션 전체 목록 (최근 활동 순)
+  app-sessions 검색어          제목·폴더에 검색어가 들어간 세션만
+  app-sessions -r 검색어       찾은 세션을 해당 폴더에서 `claude --resume` 으로 이어가기
+                               (여러 개면 번호를 골라서)
+  app-sessions -a ...          보관(archive)된 세션만 보기
+  app-sessions --json ...      기계가 읽을 JSON 으로 출력 (앱 세션 ID 포함)
+"""
+import glob
+import json
+import os
+import sys
+from datetime import datetime
+
+APP_DIR = os.path.expanduser("~/Library/Application Support/Claude/claude-code-sessions")
+CLI_DIR = os.path.expanduser("~/.claude/projects")
+
+
+def load_sessions():
+    rows = []
+    for path in glob.glob(os.path.join(APP_DIR, "*", "*", "local_*.json")):
+        try:
+            with open(path, encoding="utf-8") as f:
+                d = json.load(f)
+        except (OSError, json.JSONDecodeError):
+            continue
+        cli_id = d.get("cliSessionId")
+        if not cli_id:
+            continue
+        rows.append({
+            "app_id": d.get("sessionId"),
+            "title": d.get("title") or "(제목 없음)",
+            "cwd": d.get("cwd") or d.get("originCwd") or "",
+            "cli_id": cli_id,
+            "archived": bool(d.get("isArchived")),
+            "last": (d.get("lastActivityAt") or d.get("createdAt") or 0) / 1000,
+            # CLI 기록 파일이 남아 있어야 이어갈 수 있다 (cleanupPeriodDays 에 따라 자동 삭제될 수 있음)
+            "has_log": bool(glob.glob(os.path.join(CLI_DIR, "*", cli_id + ".jsonl"))),
+        })
+    rows.sort(key=lambda r: r["last"], reverse=True)
+    return rows
+
+
+def show(rows, numbered=False):
+    home = os.path.expanduser("~")
+    for i, r in enumerate(rows, 1):
+        mark = "[보관] " if r["archived"] else ""
+        if not r["has_log"]:
+            mark += "[기록 없음] "
+        when = datetime.fromtimestamp(r["last"]).strftime("%m-%d %H:%M") if r["last"] else "-"
+        head = f"{i:>2}. " if numbered else ""
+        print(f"{head}{when}  {mark}{r['title']}")
+        print(f"{' ' * len(head)}       {r['cwd'].replace(home, '~', 1)}")
+        print(f"{' ' * len(head)}       {r['cli_id']}")
+
+
+def resume(r):
+    if not r["has_log"]:
+        sys.exit(f"CLI 기록 파일이 없어 이어갈 수 없습니다: {r['cli_id']}")
+    if not os.path.isdir(r["cwd"]):
+        sys.exit(f"작업 폴더가 없습니다: {r['cwd']}")
+    print(f"\n'{r['title']}' 세션을 이어갑니다.")
+    print("앱에서 같은 세션이 열려 있으면 먼저 닫아 주세요 (동시에 쓰면 기록이 엉킬 수 있음).\n")
+    os.chdir(r["cwd"])
+    os.execvp("claude", ["claude", "--resume", r["cli_id"]])
+
+
+def main(argv):
+    do_resume = archived_only = as_json = False
+    words = []
+    for a in argv:
+        if a in ("-r", "--resume"):
+            do_resume = True
+        elif a in ("-a", "--archived"):
+            archived_only = True
+        elif a == "--json":
+            as_json = True
+        elif a in ("-h", "--help"):
+            print(__doc__.strip())
+            return
+        else:
+            words.append(a)
+
+    rows = load_sessions()
+    if archived_only:
+        rows = [r for r in rows if r["archived"]]
+    query = " ".join(words).lower()
+    if query:
+        rows = [r for r in rows if query in r["title"].lower() or query in r["cwd"].lower()]
+
+    if as_json:
+        for r in rows:
+            r["last"] = datetime.fromtimestamp(r["last"]).isoformat(timespec="minutes") if r["last"] else None
+        print(json.dumps(rows, ensure_ascii=False, indent=1))
+        return
+
+    if not rows:
+        sys.exit("일치하는 앱 세션이 없습니다.")
+
+    if not do_resume:
+        show(rows)
+        return
+
+    if len(rows) == 1:
+        resume(rows[0])
+    show(rows, numbered=True)
+    try:
+        pick = input("\n이어갈 번호 (취소: Enter): ").strip()
+    except (EOFError, KeyboardInterrupt):
+        return
+    if pick.isdigit() and 1 <= int(pick) <= len(rows):
+        resume(rows[int(pick) - 1])
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

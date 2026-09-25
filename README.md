@@ -39,7 +39,14 @@ git clone https://github.com/MiracleWorks2024/tools-pub.git ~/MAS/CA/tools/githu
 sh ~/MAS/CA/tools/github-pub/setup.sh
 ```
 
-`setup.sh`는 `skills/` 아래 스킬을 `~/.claude/skills/`에 링크로 연결하고, Claude Code 세션이 시작될 때마다 이 저장소를 자동으로 `git pull` 하는 훅을 등록합니다. 여러 번 실행해도 안전합니다.
+`setup.sh`는 다음을 합니다. 여러 번 실행해도 안전합니다.
+
+- `skills/` 아래 스킬을 `~/.claude/skills/`에 링크로 연결
+- 터미널 명령(`app-sessions`)을 `~/.local/bin/`에 링크로 연결
+- Claude Code 세션이 시작될 때마다 이 저장소를 자동으로 `git pull` 하는 훅 등록
+- 대화 기록 보관기간(`cleanupPeriodDays`)이 설정돼 있지 않으면 36500일(약 100년)로 설정. 기본값 30일이면 CLI 세션 기록이 지워집니다
+
+새 스킬이나 명령이 추가된 뒤에는 자동 pull 만으로는 연결되지 않으므로 `setup.sh`를 한 번 더 실행합니다.
 
 **Claude 데스크톱 앱에서 할 때**는 새 세션을 열고 첫 메시지로 다음을 붙여넣습니다. 폴더는 지정하지 않아도 됩니다.
 
@@ -55,8 +62,10 @@ sh ~/MAS/CA/tools/github-pub/setup.sh
 
 ```bash
 git -C ~/MAS/CA/tools/github-pub remote get-url origin   # https://github.com/MiracleWorks2024/tools-pub.git
-ls -l ~/.claude/skills/                                  # setup-claude-default-folder -> …/github-pub/skills/…
+ls -l ~/.claude/skills/                                  # setup-claude-default-folder, app-sessions -> …/github-pub/skills/…
 grep pull-tools-pub ~/.claude/settings.json              # 훅 등록 한 줄
+grep cleanupPeriodDays ~/.claude/settings.json           # 대화 기록 보관기간
+app-sessions | head -3                                   # 명령 동작 확인 (macOS)
 ```
 
 ### Hermes / 기타 로컬 환경
@@ -111,6 +120,7 @@ git config --global user.email "325897086+MiracleWorks2024@users.noreply.github.
 | `md2html/md2html.py` | 마크다운 → 인쇄 최적화 HTML(A4) 변환. 4종 테마, 메타박스 자동 승격, 출력 파일 버전 자동 증분 | `markdown` |
 | `md2docx/md2docx.py` | 마크다운 → Word(.docx) 변환. 한글 글꼴 지정, 열이 많은 표는 가로 페이지 배치. [상세](md2docx/README.md) | `python-docx` |
 | `skills/setup-claude-default-folder` | Claude Code 스킬. 폴더 미지정 세션의 기본 산출물 폴더를 컴퓨터별로 설정. [상세](skills/setup-claude-default-folder/README.md) | 없음 |
+| `skills/app-sessions` | 터미널 명령 + Claude Code 스킬. 데스크톱 앱 세션을 제목으로 찾아 CLI 에서 `claude --resume` 으로 이어가기 (보관된 세션 포함, macOS). [상세](skills/app-sessions/README.md) | 없음 |
 
 필요한 패키지는 한 번에 설치할 수 있습니다.
 
@@ -148,7 +158,7 @@ tools-pub/
 ├── CLAUDE.md            Claude Code용 작업 규칙 (자동 로드)
 ├── .gitignore
 ├── requirements.txt     Python 의존성
-├── setup.sh             Claude Code 연결 (스킬 링크 + 자동 pull 훅)
+├── setup.sh             Claude Code 연결 (스킬·명령 링크 + 자동 pull 훅 + 보관기간)
 ├── hooks/
 │   └── pull-tools-pub.sh
 ├── md2html/
@@ -157,7 +167,11 @@ tools-pub/
 │   ├── md2docx.py
 │   └── README.md
 └── skills/
-    └── setup-claude-default-folder/
+    ├── setup-claude-default-folder/
+    │   ├── SKILL.md
+    │   └── README.md
+    └── app-sessions/
+        ├── app-sessions     터미널 명령 (Python)
         ├── SKILL.md
         └── README.md
 ```
