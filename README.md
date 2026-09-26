@@ -120,7 +120,7 @@ git config --global user.email "325897086+MiracleWorks2024@users.noreply.github.
 | `md2html/md2html.py` | 마크다운 → 인쇄 최적화 HTML(A4) 변환. 4종 테마, 메타박스 자동 승격, 출력 파일 버전 자동 증분 | `markdown` |
 | `md2docx/md2docx.py` | 마크다운 → Word(.docx) 변환. 한글 글꼴 지정, 열이 많은 표는 가로 페이지 배치. [상세](md2docx/README.md) | `python-docx` |
 | `skills/setup-claude-default-folder` | Claude Code 스킬. 폴더 미지정 세션의 기본 산출물 폴더를 컴퓨터별로 설정. [상세](skills/setup-claude-default-folder/README.md) | 없음 |
-| `skills/app-sessions` | 터미널 명령 + Claude Code 스킬. 데스크톱 앱 세션을 제목으로 찾아 CLI 에서 `claude --resume` 으로 이어가기 (보관된 세션 포함, macOS). [상세](skills/app-sessions/README.md) | 없음 |
+| `skills/app-sessions` | 터미널 명령 + Claude Code 스킬. 데스크톱 앱 세션을 CLI 에서 `claude --resume` 으로 이어가기(보관된 세션 포함), CLI 세션을 앱에서 열기 (macOS). [상세](skills/app-sessions/README.md) | 없음 |
 
 필요한 패키지는 한 번에 설치할 수 있습니다.
 
